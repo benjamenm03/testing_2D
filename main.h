@@ -168,6 +168,9 @@ public:
                     std::cout << "Processor " << iProc << " interpolated coord (" << x << ", " << y << ") and pasted value" << std::endl;
                 }
             }
+            else {
+                dest_grid.set(x, y, 100.0);
+            }
 
         } else if (src_exists && !dest_exists) {
             // Throw error

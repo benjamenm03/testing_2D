@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
         for (int j = 0; j < y_indices_per_proc_new; j++) {
             auto [x, y] = local_interpolated_grid.get_global_coords(i, j);
             MPI_Barrier(MPI_COMM_WORLD);
-            SpatialGrid::transfer_coord(iProc, nProcs, x, y, local_temperature_grid, local_interpolated_grid, true);
+            SpatialGrid::transfer_coord(iProc, nProcs, x, y, local_temperature_grid, local_interpolated_grid);
         }
     }
 
