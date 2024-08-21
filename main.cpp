@@ -94,8 +94,8 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
 
     int total_spatial_width_new = 10;
-    double x_resolution_new = 0.1;
-    double y_resolution_new = 0.1;
+    double x_resolution_new = 0.5;
+    double y_resolution_new = 0.5;
     int num_x_indices_new = total_spatial_width_new / x_resolution_new;
     int num_y_indices_new = total_spatial_width_new / y_resolution_new;
 
