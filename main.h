@@ -19,6 +19,7 @@ public:
     int x_start, y_start;
     int x_indices_per_proc, y_indices_per_proc;
     int total_spatial_width;
+    std::map<std::pair<double, double>, double> boundary_map;
 
     SpatialGrid(int x_indices_per_proc, int y_indices_per_proc, int total_spatial_width, double x_resolution, double y_resolution, int x_start = 0, int y_start = 0) {
         this->grid = arma::zeros<arma::mat>(x_indices_per_proc, y_indices_per_proc);
@@ -74,6 +75,39 @@ public:
         return x_start * sqrt_procs + y_start;
     }
 
+    std::map<std::pair<double, double>, double> create_boundary_map(std::map<std::pair<double, double>, double> &boundary_map) {
+        for (int i = 0; i < x_indices_per_proc; i++) {
+            for (int j = 0; j < y_indices_per_proc; j++) {
+                if (i == 0 || i == x_indices_per_proc - 1 || j == 0 || j == y_indices_per_proc - 1) {
+                    auto [x, y] = get_global_coords(i, j);
+                    boundary_map[{x, y}] = grid(i, j);
+                }
+            }
+        }
+        return boundary_map;
+    }
+
+    std::vector<double> pack_boundary_map(std::map<std::pair<double, double>, double> &boundary_map) {
+        std::vector<double> packed_data;
+        for (auto &pair : boundary_map) {
+            packed_data.push_back(pair.first.first);
+            packed_data.push_back(pair.first.second);
+            packed_data.push_back(pair.second);
+        }
+        return packed_data;
+    }
+
+    std::map<std::pair<double, double>, double> unpack_boundary_vector(std::vector<double> &boundary_vector) {
+        std::map<std::pair<double, double>, double> boundary_map;
+        for (int i = 0; i < boundary_vector.size(); i += 3) {
+            double x = boundary_vector[i];
+            double y = boundary_vector[i + 1];
+            double value = boundary_vector[i + 2];
+            boundary_map[{x, y}] = value;
+        }
+        return boundary_map;
+    }
+
     std::vector<std::pair<double, double>> find_nearest_coords(double x, double y, double src_x_resolution, double src_y_resolution, int src_total_width, int src_x_start, int src_y_start) {
         double x_mod = fmod(x, src_x_resolution);
         double y_mod = fmod(y, src_y_resolution);
@@ -93,7 +127,7 @@ public:
         return {{x1, y1}, {x2, y2}, {x3, y3}, {x4, y4}};
     }
 
-    static void transfer_coord(int iProc, int nProcs, double x, double y, SpatialGrid &src_grid, SpatialGrid &dest_grid, bool print = false) {
+    static void transfer_coord(int iProc, int nProcs, double x, double y, SpatialGrid &src_grid, SpatialGrid &dest_grid, std::map<std::pair<double, double>, double> boundary_map, bool print = false) {
         // *********************** THIS WORKS ***********************
         bool src_exists = src_grid.is_valid_coord(x, y);
         bool dest_exists = dest_grid.is_valid_coord(x, y);
@@ -169,7 +203,18 @@ public:
                 }
             }
             else {
-                dest_grid.set(x, y, 100.0);
+                if (iProc == dest_owner) {
+                    double top_left_val = boundary_map[{x1, y1}];
+                    double bottom_left_val = boundary_map[{x2, y2}];
+                    double top_right_val = boundary_map[{x3, y3}];
+                    double bottom_right_val = boundary_map[{x4, y4}];
+
+                    double t = (x - x1) / (x2 - x1);
+                    double u = (y - y1) / (y3 - y1);
+                    double interpolated_val = (1 - t) * (1 - u) * top_left_val + t * (1 - u) * bottom_left_val + (1 - t) * u * top_right_val + t * u * bottom_right_val;
+
+                    dest_grid.set(x, y, interpolated_val);
+                }
             }
 
         } else if (src_exists && !dest_exists) {

@@ -48,6 +48,18 @@ int main(int argc, char **argv) {
         }
     }
 
+    std::map<std::pair<double, double>, double> local_boundary_map;
+    local_temperature_grid.create_boundary_map(local_boundary_map);
+
+    std::vector<double> local_boundary_vector;
+    local_boundary_vector = local_temperature_grid.pack_boundary_map(local_boundary_map);
+
+    std::vector<double> global_boundary_vector(nProcs * local_boundary_vector.size());
+    MPI_Allgather(local_boundary_vector.data(), local_boundary_vector.size(), MPI_DOUBLE, global_boundary_vector.data(), local_boundary_vector.size(), MPI_DOUBLE, MPI_COMM_WORLD);
+
+    std::map<std::pair<double, double>, double> global_boundary_map;
+    global_boundary_map = local_temperature_grid.unpack_boundary_vector(global_boundary_vector);
+
     std::vector<double> local_temperature_vector;
     for (int i = 0; i < x_indices_per_proc; i++) {
         for (int j = 0; j < y_indices_per_proc; j++) {
@@ -82,8 +94,8 @@ int main(int argc, char **argv) {
     MPI_Barrier(MPI_COMM_WORLD);
 
     int total_spatial_width_new = 10;
-    double x_resolution_new = 0.5;
-    double y_resolution_new = 0.5;
+    double x_resolution_new = 0.1;
+    double y_resolution_new = 0.1;
     int num_x_indices_new = total_spatial_width_new / x_resolution_new;
     int num_y_indices_new = total_spatial_width_new / y_resolution_new;
 
@@ -99,7 +111,7 @@ int main(int argc, char **argv) {
         for (int j = 0; j < y_indices_per_proc_new; j++) {
             auto [x, y] = local_interpolated_grid.get_global_coords(i, j);
             MPI_Barrier(MPI_COMM_WORLD);
-            SpatialGrid::transfer_coord(iProc, nProcs, x, y, local_temperature_grid, local_interpolated_grid);
+            SpatialGrid::transfer_coord(iProc, nProcs, x, y, local_temperature_grid, local_interpolated_grid, global_boundary_map);
         }
     }
 
