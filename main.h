@@ -131,12 +131,10 @@ public:
     }
 
     static void transfer_coord(int iProc, int nProcs, double x, double y, SpatialGrid &src_grid, SpatialGrid &dest_grid, std::map<std::pair<double, double>, double> boundary_map, bool print = false) {
-        // *********************** THIS WORKS ***********************
         bool src_exists = src_grid.is_valid_coord(x, y);
         bool dest_exists = dest_grid.is_valid_coord(x, y);
 
         if (src_exists && dest_exists) {
-            // Copy point over
             int src_owner = src_grid.get_owner_coord(x, y, std::sqrt(nProcs), src_grid.x_resolution, src_grid.y_resolution);
             int dest_owner = dest_grid.get_owner_coord(x, y, std::sqrt(nProcs), dest_grid.x_resolution, dest_grid.y_resolution);
 
@@ -164,18 +162,7 @@ public:
                     std::cout << "Processor " << iProc << " does not own the source or destination coord. Skipping..." << std::endl;
                 }
             }
-        // **********************************************************
         } else if (!src_exists && dest_exists) {
-            // Interpolate
-
-            // 1. Find the nearest coordinates in the source grid
-            // 2. Determine owners of each corner of the nearest coordinates rectangle
-            // 3. Look through combination of ownership possibilities
-                // a. If all four corners are owned by the same processor, do nothing other than interpolate and paste value in
-                // b. If each corner is owned by separate processor, each processor sends, and destination processor receives
-                // c. If there's a mismatch, each processor that owns a point does a send, and the destination does a receive
-            // 4. Interpolate the value and paste it into the destination grid
-
             std::vector<std::pair<double, double> > nearest_coords = src_grid.find_nearest_coords(x, y, src_grid.x_resolution, src_grid.y_resolution, src_grid.total_spatial_width, src_grid.x_start, src_grid.y_start);
 
             double x1 = nearest_coords[0].first, y1 = nearest_coords[0].second;
@@ -221,11 +208,9 @@ public:
             }
 
         } else if (src_exists && !dest_exists) {
-            // Throw error
             std::cout << "Destination grid does not contain coordinate (" << x << ", " << y << ")" << std::endl;
             throw std::runtime_error("Destination grid does not contain coordinate");
         } else {
-            // Throw error
             std::cout << "Neither source nor destination grid contain coordinate (" << x << ", " << y << ")" << std::endl;
             throw std::runtime_error("Neither source nor destination grid contain coordinate");
         }
@@ -234,14 +219,12 @@ public:
     }
 
     bool is_valid_coord(double x, double y) {
-        const double tolerance = 1e-9;  // Small tolerance to handle precision issues
+        const double tolerance = 1e-9;
 
-        // Correctly validate against the entire grid, not just local
         if (x < 0 || x >= total_spatial_width || y < 0 || y >= total_spatial_width) {
             return false;
         }
 
-        // Ensure the coordinates align with the grid resolution
         double x_mod = fmod(x, x_resolution);
         double y_mod = fmod(y, y_resolution);
 
@@ -271,9 +254,8 @@ public:
             for (int j = 0; j < y_indices_per_proc; j++) {
                 auto [x, y] = get_global_coords(i, j);
 
-                // Check if the coordinate is within the boundary
                 if (x > x_max_boundary || y > y_max_boundary) {
-                    continue;  // Skip values outside the valid boundary
+                    continue;
                 }
 
                 double data = grid(i, j);
