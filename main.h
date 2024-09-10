@@ -20,6 +20,7 @@ public:
     int x_indices_per_proc, y_indices_per_proc;
     int total_spatial_width;
     std::map<std::pair<double, double>, double> boundary_map;
+    double x_max_boundary, y_max_boundary;
 
     SpatialGrid(int x_indices_per_proc, int y_indices_per_proc, int total_spatial_width, double x_resolution, double y_resolution, int x_start = 0, int y_start = 0) {
         this->grid = arma::zeros<arma::mat>(x_indices_per_proc, y_indices_per_proc);
@@ -30,6 +31,8 @@ public:
         this->x_indices_per_proc = x_indices_per_proc;
         this->y_indices_per_proc = y_indices_per_proc;
         this->total_spatial_width = total_spatial_width;
+        this->x_max_boundary = total_spatial_width - 1;
+        this->y_max_boundary = total_spatial_width - 1;
     }
 
     void set(double x, double y, double value) {
@@ -266,6 +269,13 @@ public:
 
         for (int i = 0; i < x_indices_per_proc; i++) {
             for (int j = 0; j < y_indices_per_proc; j++) {
+                auto [x, y] = get_global_coords(i, j);
+
+                // Check if the coordinate is within the boundary
+                if (x > x_max_boundary || y > y_max_boundary) {
+                    continue;  // Skip values outside the valid boundary
+                }
+
                 double data = grid(i, j);
                 file << data;
                 if (j < y_indices_per_proc - 1) {
