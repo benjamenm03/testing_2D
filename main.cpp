@@ -7,8 +7,8 @@
 #define original_x_res 1 // Original resolution of the temperature grid, x-axis
 #define original_y_res 1 // Original resolution of the temperature grid, y-axis
 
-#define interpolated_x_res 0.5 // Resolution of the interpolated temperature grid, x-axis
-#define interpolated_y_res 0.5 // Resolution of the interpolated temperature grid, y-axis
+#define interpolated_x_res 0.1 // Resolution of the interpolated temperature grid, x-axis
+#define interpolated_y_res 0.1 // Resolution of the interpolated temperature grid, y-axis
 
 // Driver function to run the interpolation program
 int main(int argc, char **argv) {
