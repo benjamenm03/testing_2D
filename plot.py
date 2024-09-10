@@ -6,11 +6,6 @@ from mpl_toolkits.mplot3d import Axes3D
 matrix1 = np.genfromtxt('temperature_grid.csv', delimiter=',')
 matrix2 = np.genfromtxt('interpolated_grid.csv', delimiter=',')
 
-# Mask only the extreme edges (last row/column) where erroneous data might appear
-# Assuming the erroneous data only appears at the outermost boundaries:
-matrix2[-1, :] = np.nan  # Mask last row
-matrix2[:, -1] = np.nan  # Mask last column
-
 # Create a grid of indices for both matrices
 x1 = np.arange(matrix1.shape[1])
 y1 = np.arange(matrix1.shape[0])
@@ -24,14 +19,14 @@ X2, Y2 = np.meshgrid(x2, y2)
 fig, axs = plt.subplots(2, 2, figsize=(12, 10))
 
 # Plot the first matrix in 2D
-c1 = axs[0, 0].pcolormesh(X1, Y1, matrix1, cmap='viridis', shading='auto')  # Use 'shading' to smooth out plots
+c1 = axs[0, 0].pcolormesh(X1, Y1, matrix1, cmap='viridis')
 fig.colorbar(c1, ax=axs[0, 0])
 axs[0, 0].set_xlabel('X')
 axs[0, 0].set_ylabel('Y')
 axs[0, 0].set_title('Temperature Grid')
 
 # Plot the second matrix in 2D
-c2 = axs[0, 1].pcolormesh(X2, Y2, matrix2, cmap='viridis', shading='auto')  # Use 'shading' to smooth out plots
+c2 = axs[0, 1].pcolormesh(X2, Y2, matrix2, cmap='viridis')
 fig.colorbar(c2, ax=axs[0, 1])
 axs[0, 1].set_xlabel('X')
 axs[0, 1].set_ylabel('Y')
