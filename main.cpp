@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
     int num_y_indices_new = total_spatial_width_new / y_resolution_new; // Number of y indices in the interpolated temperature grid
 
     int x_indices_per_proc_new = num_x_indices_new / sqrt_procs; // Number of x indices per processor
-    int y_indices_per_proc_new = num_y_indices_new / sqrt_procs; //     Number of y indices per processor
+    int y_indices_per_proc_new = num_y_indices_new / sqrt_procs; // Number of y indices per processor
 
     int x_start_new = (iProc / sqrt_procs) * x_indices_per_proc_new; // Starting x index for the processor
     int y_start_new = (iProc % sqrt_procs) * y_indices_per_proc_new; // Starting y index for the processor
