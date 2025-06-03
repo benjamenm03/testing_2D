@@ -6,7 +6,6 @@ from mpl_toolkits.mplot3d import Axes3D
 matrix1 = np.genfromtxt('temperature_grid.csv', delimiter=',')
 matrix2 = np.genfromtxt('interpolated_grid.csv', delimiter=',')
 
-matrix2 = matrix2[:, :-1]
 
 # Create a grid of indices for both matrices
 x1 = np.arange(matrix1.shape[1])
