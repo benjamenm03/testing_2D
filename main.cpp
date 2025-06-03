@@ -19,7 +19,10 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
 
     int sqrt_p = static_cast<int>(std::sqrt(nProcs));
-    if (iProc == 0 && sqrt_p * sqrt_p != nProcs) {
+    if (sqrt_p * sqrt_p != nProcs) {
+        if (iProc == 0) {
+            std::cerr << "Number of processes must be a perfect square" << std::endl;
+        }
         MPI_Finalize();
         return 1;
     }
