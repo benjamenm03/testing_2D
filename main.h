@@ -22,18 +22,19 @@ public:
     double x_resolution, y_resolution;
     int x_start, y_start;
     int x_indices_per_proc, y_indices_per_proc;
-    int total_spatial_width;
+    double total_x_width, total_y_width;
     double x_max_boundary, y_max_boundary;
 
-    SpatialGrid(int x_indices_per_proc, int y_indices_per_proc, int total_spatial_width,
+    SpatialGrid(int x_indices_per_proc, int y_indices_per_proc,
+                double total_x_width, double total_y_width,
                 double x_resolution, double y_resolution, int x_start = 0, int y_start = 0)
         : grid(arma::zeros<arma::mat>(x_indices_per_proc, y_indices_per_proc)),
           x_resolution(x_resolution), y_resolution(y_resolution),
           x_start(x_start), y_start(y_start),
           x_indices_per_proc(x_indices_per_proc), y_indices_per_proc(y_indices_per_proc),
-          total_spatial_width(total_spatial_width),
-          x_max_boundary(total_spatial_width - x_resolution),
-          y_max_boundary(total_spatial_width - y_resolution) {}
+          total_x_width(total_x_width), total_y_width(total_y_width),
+          x_max_boundary(total_x_width - x_resolution),
+          y_max_boundary(total_y_width - y_resolution) {}
 
     void set(double x, double y, double value) {
         const double tol = 1e-9;
